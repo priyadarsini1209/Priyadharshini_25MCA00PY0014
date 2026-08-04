@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Pu Online Shopping</title>
+
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+
+body{
+    background:#f2f2f2;
+}
+
+
+/* Header */
+
+header{
+    background:#2874f0;
+    color:white;
+    text-align:center;
+    padding:30px;
+}
+
+
+header h1{
+    font-size:40px;
+}
+
+
+
+/* Navigation */
+
+nav{
+
+    background:#222;
+    padding:15px;
+    text-align:center;
+
+}
+
+
+nav button{
+
+    background:none;
+    border:none;
+    color:white;
+    margin:10px 20px;
+    font-size:18px;
+    cursor:pointer;
+
+}
+
+
+nav button:hover{
+
+    color:#ffd700;
+
+}
+
+
+
+/* Message Box */
+
+    #message{
+    width:30%;          /* Reduced width */
+    min-width:450px;    /* Prevents becoming too small */
+    margin:30px auto;   /* Centers horizontally */
+    padding:20px;
+    background:white;
+    text-align:center;
+    border-radius:10px;
+    box-shadow:0 0 10px gray;
+    font-size:20px;
+
+}
+
+
+
+/* Products */
+
+.container{
+
+    width:90%;
+    margin:auto;
+
+}
+
+
+.title{
+
+    text-align:center;
+    color:#2874f0;
+    margin:30px;
+
+}
+
+
+.products{
+
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:25px;
+
+}
+
+
+
+.card{
+
+    background:white;
+    padding:15px;
+    border-radius:10px;
+    text-align:center;
+    box-shadow:0 0 10px gray;
+
+}
+
+
+.card:hover{
+
+    transform:scale(1.03);
+
+}
+
+
+
+.card img{
+
+    width:100%;
+    height:180px;
+
+}
+
+
+
+.card h2{
+
+    margin:10px;
+
+}
+
+
+
+.price{
+
+    color:green;
+    font-size:22px;
+    margin:10px;
+
+}
+
+
+
+.card button{
+
+    background:#2874f0;
+    color:white;
+    border:none;
+    padding:10px;
+    margin:5px;
+    border-radius:5px;
+    cursor:pointer;
+
+}
+
+
+
+.card button:hover{
+
+    background:#174ea6;
+
+}
+
+
+
+/* Footer */
+
+footer{
+
+    background:#222;
+    color:white;
+    padding:20px;
+    text-align:center;
+    margin-top:30px;
+
+}
+
+@media(max-width:768px){
+
+    #message{
+        width:90%;
+        min-width:auto;
+    }
+
+}
+
+
+
+@media(max-width:900px){
+
+.products{
+
+grid-template-columns:repeat(2,1fr);
+
+}
+
+}
+
+
+@media(max-width:500px){
+
+.products{
+
+grid-template-columns:1fr;
+
+}
+
+}
+
+
+</style>
+<script>
+
+let cart = [];
+
+// Show message
+function showMessage(text) {
+    document.getElementById("message").innerHTML = text;
+}
+
+
+// Add product to cart
+function addCart(product, price) {
+
+    cart.push({
+        name: product,
+        price: price
+    });
+
+    displayCart();
+}
+
+
+
+// Buy Now
+function buy(product, price) {
+
+    cart = [];
+
+    cart.push({
+        name: product,
+        price: price
+    });
+
+    placeOrder();
+}
+
+
+// Display cart
+
+   function displayCart(){
+
+    let message = "<h2>🛒 Shopping Cart</h2>";
+    let total = 0;
+
+    if(cart.length === 0){
+
+        message += "<p>Your cart is empty.</p>";
+
+    }
+    else{
+
+        message += `
+        <table border="1" width="100%" style="border-collapse:collapse;">
+        <tr style="background:#2874f0;color:white;">
+        <th>Product</th>
+        <th>Price</th>
+        <th>Action</th>
+        </tr>
+        `;
+
+
+        cart.forEach(function(item,index){
+
+            total += item.price;
+
+            message += `
+            <tr>
+            <td>${item.name}</td>
+            <td>₹${item.price.toLocaleString('en-IN')}</td>
+
+            <td>
+            <button onclick="removeItem(${index})"
+            style="background:red;color:white;padding:5px;border:none;border-radius:5px;">
+            Remove
+            </button>
+            </td>
+
+            </tr>
+            `;
+
+        });
+
+
+        message += `
+
+        <tr>
+        <td><b>Total</b></td>
+        <td><b>₹${total.toLocaleString('en-IN')}</b></td>
+        <td></td>
+        </tr>
+
+        </table>
+
+        <br>
+
+        <button onclick="placeOrder()"
+        style="background:green;color:white;padding:10px;border:none;border-radius:5px;">
+        Place Order
+        </button>
+
+        `;
+
+    }
+
+
+    document.getElementById("message").innerHTML = message;
+
+}
+
+
+
+// Order Bill
+function placeOrder(){
+
+    let total = 0;
+    let bill = "";
+
+
+    cart.forEach(function(item){
+
+        total += item.price;
+
+        bill += `
+        <p>${item.name} : ₹${item.price}</p>
+        `;
+
+    });
+
+
+    document.getElementById("message").innerHTML = `
+
+    <h2>🧾 PU Online Shopping Bill</h2>
+
+    <hr>
+
+    ${bill}
+
+    <hr>
+
+    <h3>Total Amount : ₹${total}</h3>
+
+    <h3 style="color:green;">
+    ✅ Order Placed Successfully
+    </h3>
+
+    <p>
+    Thank you for shopping with us.
+    </p>
+
+    `;
+
+
+    cart=[];
+
+}
+
+
+
+// Remove item
+function removeItem(index){
+
+    cart.splice(index,1);
+
+    displayCart();
+
+}
+
+
+</script>
+
+</head>
+
+
+
+<body>
+
+
+<header>
+
+<h1>🛒 Pu Online Shopping</h1>
+
+<p>Shop Smart | Shop Easy | Best Quality Products</p>
+
+</header>
+
+
+
+<nav>
+
+
+
+<button onclick="showMessage('🛍️ Showing all products')">
+Products
+</button>
+
+
+<button onclick="displayCart()">
+🛒 Cart
+</button>
+
+
+<button onclick="showMessage('📦 Your Orders will appear here')">
+Orders
+</button>
+
+
+<button onclick="showMessage('🎁 20% discount available on selected products')">
+Offers
+</button>
+
+
+<button onclick="showMessage('📞 Email: Pushop@gmail.com | Phone: 9876543210')">
+Contact
+</button>
+
+
+</nav>
+
+
+
+<div id="message">
+
+Welcome to Pu Online Shopping
+
+</div>
+
+
+
+
+<div class="container">
+
+
+<h1 class="title">
+
+Featured Products
+
+</h1>
+
+
+
+<div class="products">
+ 
+    <div class="card">
+        <img src="https://media-ik.croma.com/Croma%20Assets/Computers%20Peripherals/Laptop/Images/310954_0_wx0jbi.png" alt="HP Laptop">
+
+        <h2>HP Laptop</h2>
+        <p>Intel i5, 8GB RAM, 512GB SSD</p>
+        <h3 class="price">₹55,999</h3>
+
+        <button onclick="addCart('HP Laptop',55999)">Add Cart</button>
+        <button onclick="buy('HP Laptop',55999)">Buy Now</button>
+    </div>
+
+
+    <div class="card">
+        <img src="https://dellstatic.luroconnect.com/media/catalog/product/cache/74ae05ef3745aec30d7f5a287debd7f5/n/o/notebook-db16250nt-fpr-bl-gallery-2.jpg" alt="Dell Laptop">
+
+        <h2>Dell Laptop</h2>
+        <p>Intel i7 Processor</p>
+        <h3 class="price">₹62,999</h3>
+
+        <button onclick="addCart('Dell Laptop',62999)">Add Cart</button>
+        <button onclick="buy('Dell Laptop',62999)">Buy Now</button>
+    </div>
+
+
+    <div class="card">
+        <img src="https://images.samsung.com/is/image/samsung/assets/in/s2602/pcd/smartphones/PF_Main-Category_Galaxy-Smartphone_176x176.png" alt="Samsung Mobile">
+
+        <h2>Samsung Mobile</h2>
+        <p>50MP Camera, 128GB Storage</p>
+        <h3 class="price">₹1,29,999</h3>
+
+        <button onclick="addCart('Samsung Mobile',129999)">Add Cart</button>
+        <button onclick="buy('Samsung Mobile',129999)">Buy Now</button>
+    </div>
+
+
+    <div class="card">
+        <img src="https://m.media-amazon.com/images/I/71vFKBpKakL._SL1500_.jpg" alt="iPhone 15">
+
+        <h2>iPhone 15</h2>
+        <p>Apple A16 Chip</p>
+        <h3 class="price">₹69,999</h3>
+
+        <button onclick="addCart('iPhone 15',69999)">Add Cart</button>
+        <button onclick="buy('iPhone 15',69999)">Buy Now</button>
+    </div>
+
+
+    <div class="card">
+        <img src="https://m.media-amazon.com/images/I/61Qe0euJJZL._SL1500_.jpg" alt="Smart Watch">
+
+        <h2>Smart Watch</h2>
+        <p>Heart Rate Monitor</p>
+        <h3 class="price">₹3,999</h3>
+
+        <button onclick="addCart('Smart Watch',3999)">Add Cart</button>
+        <button onclick="buy('Smart Watch',3999)">Buy Now</button>
+    </div>
+
+
+    <div class="card">
+        <img src="https://img-prd-pim.poorvika.com/cdn-cgi/image/width=500,height=500,quality=75,format=auto/product/apple-watch-ultra-2-gps-cellular-natural-titanium-case-with-trail-loop-s-m-blue-49mm-mx4j3hn-a-left-view.png" alt="Apple Watch">
+
+        <h2>Apple Watch</h2>
+        <p>Premium Watch</p>
+        <h3 class="price">₹39,999</h3>
+
+        <button onclick="addCart('Apple Watch',39999)">Add Cart</button>
+        <button onclick="buy('Apple Watch',39999)">Buy Now</button>
+    </div>
+
+
+    <div class="card">
+        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTXEPtLa9-26lHNRM87QLWMxzG-nSSV4UZvU7wSM_DG7CzGQ0mmhuQxH_Q&s=10" alt="Digital Camera">
+
+        <h2>Digital Camera</h2>
+        <p>Professional Camera</p>
+        <h3 class="price">₹19,999</h3>
+
+        <button onclick="addCart('Digital Camera',19999)">Add Cart</button>
+        <button onclick="buy('Digital Camera',19999)">Buy Now</button>
+    </div>
+
+
+    <div class="card">
+        <img src="https://m.media-amazon.com/images/I/71lVwl3q-kL._SL1500_.jpg" alt="Power Bank">
+
+        <h2>Power Bank</h2>
+        <p>20000mAh Battery</p>
+        <h3 class="price">₹1,299</h3>
+
+        <button onclick="addCart('Power Bank',1299)">Add Cart</button>
+        <button onclick="buy('Power Bank',1299)">Buy Now</button>
+    </div>
+
+</div>
+
+
+
+
+<footer>
+
+© 2026 Pu Online Shopping | All Rights Reserved
+
+</footer>
+<a href="portfolio.html">← Back to Portfolio</a>
+
+
+</body>
+
+</html>
