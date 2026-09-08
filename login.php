@@ -6,74 +6,98 @@ include "db.php";
 
 $message = "";
 
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-if(isset($_POST['login'])) {
+    $email = trim($_POST["email"]);
+    $password = $_POST["password"];
+    $role = $_POST["role"];
 
-    $email = trim($_POST['email']);
-    $password = $_POST['password'];
+    if ($role == "employee") {
 
+        $stmt = $conn->prepare(
+            "SELECT * FROM employees WHERE email = ?"
+        );
 
-    $stmt = $conn->prepare(
-        "SELECT id, fullname, password
-         FROM users
-         WHERE email = ?"
-    );
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
 
-    $stmt->bind_param("s", $email);
+        $result = $stmt->get_result();
 
-    $stmt->execute();
+        if ($result->num_rows == 1) {
 
-    $result = $stmt->get_result();
+            $employee = $result->fetch_assoc();
 
+            if (password_verify($password, $employee["password"])) {
 
-    if($result->num_rows == 1) {
+                session_regenerate_id(true);
 
-        $user = $result->fetch_assoc();
+                $_SESSION["employee_id"] = $employee["id"];
+                $_SESSION["employee_name"] = $employee["name"];
+                $_SESSION["role"] = "employee";
 
+                header("Location: employee_dashboard.php");
+                exit;
 
-        if(password_verify($password, $user['password'])) {
+            } else {
 
-            $_SESSION['user'] = $user['fullname'];
-            $_SESSION['user_id'] = $user['id'];
+                $message = "Invalid employee password.";
 
-            header("Location: index.php");
+            }
 
-            exit();
+        } else {
+
+            $message = "Employee account not found.";
 
         }
 
-        else {
+    } elseif ($role == "admin") {
 
-            $message = "Invalid email or password.";
+        $stmt = $conn->prepare(
+            "SELECT * FROM admins WHERE username = ?"
+        );
+
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+
+        $result = $stmt->get_result();
+
+        if ($result->num_rows == 1) {
+
+            $admin = $result->fetch_assoc();
+
+            if (password_verify($password, $admin["password"])) {
+
+                session_regenerate_id(true);
+
+                $_SESSION["admin_id"] = $admin["id"];
+                $_SESSION["admin_username"] = $admin["username"];
+                $_SESSION["role"] = "admin";
+
+                header("Location: admin_dashboard.php");
+                exit;
+
+            } else {
+
+                $message = "Invalid admin password.";
+
+            }
+
+        } else {
+
+            $message = "Admin account not found.";
 
         }
-
     }
-
-    else {
-
-        $message = "Invalid email or password.";
-
-    }
-
 }
 
 ?>
 
-
 <!DOCTYPE html>
-
-<html lang="en">
+<html>
 
 <head>
 
-<meta charset="UTF-8">
-
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
-
 <title>Login</title>
-
 
 <style>
 
@@ -83,57 +107,55 @@ content="width=device-width, initial-scale=1.0">
 }
 
 body {
-    background: #eef3f8;
     margin: 0;
+    background: #eef3f8;
 }
 
-header {
+nav {
     background: #123c69;
     padding: 18px 8%;
-    color: white;
     display: flex;
     justify-content: space-between;
 }
 
-header a {
+nav h2 {
+    color: white;
+    margin: 0;
+}
+
+nav a {
     color: white;
     text-decoration: none;
     margin-left: 20px;
 }
 
-.login-container {
-    width: 380px;
+.login-box {
+    width: 420px;
     max-width: 90%;
-    margin: 70px auto;
     background: white;
+    margin: 70px auto;
     padding: 35px;
     border-radius: 10px;
-    box-shadow: 0 5px 20px rgba(0,0,0,.15);
+    box-shadow: 0 5px 20px #ccc;
 }
 
 h2 {
     text-align: center;
     color: #123c69;
-    margin-bottom: 25px;
 }
 
-label {
-    display: block;
-    margin-top: 15px;
-    margin-bottom: 5px;
-}
-
-input {
+input,
+select {
     width: 100%;
     padding: 12px;
+    margin: 8px 0 18px;
     border: 1px solid #ccc;
     border-radius: 5px;
 }
 
 button {
     width: 100%;
-    padding: 12px;
-    margin-top: 25px;
+    padding: 13px;
     background: #123c69;
     color: white;
     border: none;
@@ -142,147 +164,85 @@ button {
 }
 
 button:hover {
-    background: #0b2948;
+    background: #1d70a2;
 }
 
 .error {
-    background: #ffe5e5;
-    color: #c00000;
-    padding: 10px;
+    color: red;
     text-align: center;
     margin-bottom: 15px;
-    border-radius: 5px;
-}
-
-.register {
-    text-align: center;
-    margin-top: 20px;
-}
-
-.register a {
-    color: #123c69;
 }
 
 </style>
 
 </head>
 
-
 <body>
 
-<header>
+<nav>
 
-<b>CSE Department</b>
+<h2>ABC Technologies</h2>
 
 <div>
-
 <a href="index.php">Home</a>
-
-<a href="about.php">About</a>
-
 <a href="register.php">Register</a>
-
 </div>
 
-</header>
+</nav>
 
+<div class="login-box">
 
-<div class="login-container">
+<h2>Login</h2>
 
-<h2>Student Login</h2>
-
-
-<?php if($message != "") { ?>
+<?php if ($message != "") { ?>
 
 <div class="error">
-
 <?php echo htmlspecialchars($message); ?>
-
 </div>
 
 <?php } ?>
 
+<form method="POST">
 
-<form method="POST"
-      onsubmit="return validateLogin()">
+<label>Login As</label>
 
+<select name="role" required>
 
-<label>Email</label>
+<option value="employee">
+Employee
+</option>
+
+<option value="admin">
+Admin
+</option>
+
+</select>
+
+<label>Email / Username</label>
 
 <input
-type="email"
+type="text"
 name="email"
-id="email"
-placeholder="Enter your email"
-required>
-
+placeholder="Enter email or username"
+required
+>
 
 <label>Password</label>
 
 <input
 type="password"
 name="password"
-id="password"
-placeholder="Enter your password"
-required>
+placeholder="Enter password"
+required
+>
 
-
-<button type="submit" name="login">
-
+<button type="submit">
 Login
-
 </button>
 
 </form>
 
-
-<div class="register">
-
-Don't have an account?
-
-<a href="register.php">
-Create Account
-</a>
-
 </div>
-
-</div>
-
-
-<script>
-
-function validateLogin() {
-
-    let email =
-        document.getElementById("email").value;
-
-    let password =
-        document.getElementById("password").value;
-
-
-    if(email.trim() === "") {
-
-        alert("Please enter your email.");
-
-        return false;
-
-    }
-
-
-    if(password.trim() === "") {
-
-        alert("Please enter your password.");
-
-        return false;
-
-    }
-
-
-    return true;
-
-}
-
-</script>
 
 </body>
 
